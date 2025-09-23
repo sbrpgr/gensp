@@ -1,0 +1,358 @@
+/* KABridge Professional Color System - Designer Grade */
+
+:root {
+  /* Primary Brand Colors - Sophisticated Blue Gradient */
+  --kabridge-primary-50: #f0f6ff;
+  --kabridge-primary-100: #e0ecff;
+  --kabridge-primary-200: #c7deff;
+  --kabridge-primary-300: #a5c9ff;
+  --kabridge-primary-400: #82aeff;
+  --kabridge-primary-500: #6c93ff;
+  --kabridge-primary-600: #5570f5;
+  --kabridge-primary-700: #4852e1;
+  --kabridge-primary-800: #3d42b6;
+  --kabridge-primary-900: #363a91;
+
+  /* Secondary Accent Colors - Warm Amber & Gold */
+  --kabridge-secondary-50: #fffbeb;
+  --kabridge-secondary-100: #fef3c7;
+  --kabridge-secondary-200: #fde68a;
+  --kabridge-secondary-300: #fcd34d;
+  --kabridge-secondary-400: #fbbf24;
+  --kabridge-secondary-500: #f59e0b;
+  --kabridge-secondary-600: #d97706;
+  --kabridge-secondary-700: #b45309;
+  --kabridge-secondary-800: #92400e;
+  --kabridge-secondary-900: #78350f;
+
+  /* Success Colors - Premium Green */
+  --kabridge-success-50: #f0fdf4;
+  --kabridge-success-100: #dcfce7;
+  --kabridge-success-200: #bbf7d0;
+  --kabridge-success-300: #86efac;
+  --kabridge-success-400: #4ade80;
+  --kabridge-success-500: #22c55e;
+  --kabridge-success-600: #16a34a;
+  --kabridge-success-700: #15803d;
+  --kabridge-success-800: #166534;
+  --kabridge-success-900: #14532d;
+
+  /* Warning Colors - Professional Orange */
+  --kabridge-warning-50: #fff7ed;
+  --kabridge-warning-100: #ffedd5;
+  --kabridge-warning-200: #fed7aa;
+  --kabridge-warning-300: #fdba74;
+  --kabridge-warning-400: #fb923c;
+  --kabridge-warning-500: #f97316;
+  --kabridge-warning-600: #ea580c;
+  --kabridge-warning-700: #c2410c;
+  --kabridge-warning-800: #9a3412;
+  --kabridge-warning-900: #7c2d12;
+
+  /* Error Colors - Refined Red */
+  --kabridge-error-50: #fef2f2;
+  --kabridge-error-100: #fee2e2;
+  --kabridge-error-200: #fecaca;
+  --kabridge-error-300: #fca5a5;
+  --kabridge-error-400: #f87171;
+  --kabridge-error-500: #ef4444;
+  --kabridge-error-600: #dc2626;
+  --kabridge-error-700: #b91c1c;
+  --kabridge-error-800: #991b1b;
+  --kabridge-error-900: #7f1d1d;
+
+  /* Neutral Colors - Professional Grays */
+  --kabridge-neutral-50: #fafafa;
+  --kabridge-neutral-100: #f4f4f5;
+  --kabridge-neutral-200: #e4e4e7;
+  --kabridge-neutral-300: #d4d4d8;
+  --kabridge-neutral-400: #a1a1aa;
+  --kabridge-neutral-500: #71717a;
+  --kabridge-neutral-600: #52525b;
+  --kabridge-neutral-700: #3f3f46;
+  --kabridge-neutral-800: #27272a;
+  --kabridge-neutral-900: #18181b;
+
+  /* Surface Colors - Premium Backgrounds */
+  --kabridge-surface-white: #ffffff;
+  --kabridge-surface-light: #fefefe;
+  --kabridge-surface-subtle: #fafbfc;
+  --kabridge-surface-muted: #f7f8fa;
+  --kabridge-surface-elevated: #ffffff;
+
+  /* Glass Morphism & Modern Effects */
+  --kabridge-glass-bg: rgba(255, 255, 255, 0.85);
+  --kabridge-glass-border: rgba(255, 255, 255, 0.2);
+  --kabridge-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --kabridge-glass-blur: blur(10px);
+
+  /* Premium Shadows */
+  --kabridge-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --kabridge-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --kabridge-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --kabridge-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --kabridge-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --kabridge-shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --kabridge-shadow-glow: 0 0 20px rgba(108, 147, 255, 0.3);
+
+  /* Typography Scale */
+  --kabridge-text-xs: 0.75rem;
+  --kabridge-text-sm: 0.875rem;
+  --kabridge-text-base: 1rem;
+  --kabridge-text-lg: 1.125rem;
+  --kabridge-text-xl: 1.25rem;
+  --kabridge-text-2xl: 1.5rem;
+  --kabridge-text-3xl: 1.875rem;
+  --kabridge-text-4xl: 2.25rem;
+  --kabridge-text-5xl: 3rem;
+
+  /* Border Radius */
+  --kabridge-radius-sm: 0.375rem;
+  --kabridge-radius-md: 0.5rem;
+  --kabridge-radius-lg: 0.75rem;
+  --kabridge-radius-xl: 1rem;
+  --kabridge-radius-2xl: 1.5rem;
+  --kabridge-radius-full: 9999px;
+
+  /* Spacing */
+  --kabridge-space-xs: 0.25rem;
+  --kabridge-space-sm: 0.5rem;
+  --kabridge-space-md: 1rem;
+  --kabridge-space-lg: 1.5rem;
+  --kabridge-space-xl: 2rem;
+  --kabridge-space-2xl: 3rem;
+  --kabridge-space-3xl: 4rem;
+}
+
+/* Professional Component Styles */
+.kabridge-btn {
+  @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-200 ease-in-out;
+  border-radius: var(--kabridge-radius-lg);
+  box-shadow: var(--kabridge-shadow-sm);
+}
+
+.kabridge-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--kabridge-shadow-md);
+}
+
+.kabridge-btn-primary {
+  background: linear-gradient(135deg, var(--kabridge-primary-600), var(--kabridge-primary-700));
+  color: white;
+  border: 1px solid transparent;
+}
+
+.kabridge-btn-primary:hover {
+  background: linear-gradient(135deg, var(--kabridge-primary-700), var(--kabridge-primary-800));
+  box-shadow: var(--kabridge-shadow-glow);
+}
+
+.kabridge-btn-secondary {
+  background: var(--kabridge-surface-white);
+  color: var(--kabridge-primary-700);
+  border: 2px solid var(--kabridge-primary-200);
+}
+
+.kabridge-btn-secondary:hover {
+  background: var(--kabridge-primary-50);
+  border-color: var(--kabridge-primary-400);
+}
+
+.kabridge-card {
+  background: var(--kabridge-surface-elevated);
+  border-radius: var(--kabridge-radius-xl);
+  box-shadow: var(--kabridge-shadow-sm);
+  border: 1px solid var(--kabridge-neutral-200);
+  transition: all 0.3s ease;
+}
+
+.kabridge-card:hover {
+  box-shadow: var(--kabridge-shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--kabridge-primary-200);
+}
+
+.kabridge-glass-card {
+  background: var(--kabridge-glass-bg);
+  backdrop-filter: var(--kabridge-glass-blur);
+  border: 1px solid var(--kabridge-glass-border);
+  box-shadow: var(--kabridge-glass-shadow);
+  border-radius: var(--kabridge-radius-xl);
+}
+
+/* Premium Gradients */
+.kabridge-gradient-primary {
+  background: linear-gradient(135deg, var(--kabridge-primary-600) 0%, var(--kabridge-primary-800) 100%);
+}
+
+.kabridge-gradient-secondary {
+  background: linear-gradient(135deg, var(--kabridge-secondary-500) 0%, var(--kabridge-secondary-700) 100%);
+}
+
+.kabridge-gradient-hero {
+  background: linear-gradient(135deg, 
+    var(--kabridge-primary-600) 0%, 
+    var(--kabridge-primary-700) 35%, 
+    var(--kabridge-primary-800) 100%);
+}
+
+.kabridge-gradient-surface {
+  background: linear-gradient(135deg, 
+    var(--kabridge-surface-white) 0%, 
+    var(--kabridge-surface-subtle) 100%);
+}
+
+/* Professional Text Styles */
+.kabridge-text-gradient {
+  background: linear-gradient(135deg, var(--kabridge-primary-600), var(--kabridge-primary-800));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Industry-specific Color Schemes */
+.industry-ict {
+  --industry-primary: var(--kabridge-primary-600);
+  --industry-secondary: #6366f1;
+  --industry-accent: #8b5cf6;
+}
+
+.industry-energy {
+  --industry-primary: var(--kabridge-success-600);
+  --industry-secondary: #10b981;
+  --industry-accent: #059669;
+}
+
+.industry-automotive {
+  --industry-primary: var(--kabridge-neutral-700);
+  --industry-secondary: #374151;
+  --industry-accent: #6b7280;
+}
+
+.industry-finance {
+  --industry-primary: var(--kabridge-secondary-600);
+  --industry-secondary: #d97706;
+  --industry-accent: #f59e0b;
+}
+
+.industry-petrochemical {
+  --industry-primary: #dc2626;
+  --industry-secondary: #b91c1c;
+  --industry-accent: #991b1b;
+}
+
+.industry-aviation {
+  --industry-primary: #0ea5e9;
+  --industry-secondary: #0284c7;
+  --industry-accent: #0369a1;
+}
+
+/* Country Flag Colors */
+.country-kr {
+  --flag-primary: #cd2e3a;
+  --flag-secondary: #003478;
+}
+
+.country-ae, .country-sa, .country-qa, .country-kw, .country-bh, .country-om {
+  --flag-primary: #006c35;
+  --flag-secondary: #ce1126;
+}
+
+/* Premium Animations */
+@keyframes kabridge-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kabridge-slide-in {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes kabridge-glow {
+  0%, 100% { box-shadow: var(--kabridge-shadow-lg); }
+  50% { box-shadow: var(--kabridge-shadow-glow); }
+}
+
+.kabridge-animate-fade-in {
+  animation: kabridge-fade-in 0.6s ease-out;
+}
+
+.kabridge-animate-slide-in {
+  animation: kabridge-slide-in 0.5s ease-out;
+}
+
+.kabridge-animate-glow {
+  animation: kabridge-glow 2s ease-in-out infinite;
+}
+
+/* Professional Focus States */
+.kabridge-focus {
+  outline: 2px solid var(--kabridge-primary-500);
+  outline-offset: 2px;
+}
+
+/* Premium Status Indicators */
+.status-active {
+  background: linear-gradient(135deg, var(--kabridge-success-500), var(--kabridge-success-600));
+}
+
+.status-pending {
+  background: linear-gradient(135deg, var(--kabridge-warning-500), var(--kabridge-warning-600));
+}
+
+.status-inactive {
+  background: linear-gradient(135deg, var(--kabridge-neutral-400), var(--kabridge-neutral-500));
+}
+
+/* High-End Loading States */
+.kabridge-skeleton {
+  background: linear-gradient(90deg, 
+    var(--kabridge-neutral-200) 25%, 
+    var(--kabridge-neutral-100) 50%, 
+    var(--kabridge-neutral-200) 75%);
+  background-size: 200% 100%;
+  animation: kabridge-skeleton-pulse 2s infinite;
+}
+
+@keyframes kabridge-skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--kabridge-neutral-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--kabridge-primary-400), var(--kabridge-primary-600));
+  border-radius: var(--kabridge-radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--kabridge-primary-500), var(--kabridge-primary-700));
+}
+
+/* Professional Selection */
+::selection {
+  background: var(--kabridge-primary-200);
+  color: var(--kabridge-primary-900);
+}
+
+/* Print Optimizations */
+@media print {
+  .kabridge-card, .kabridge-glass-card {
+    box-shadow: none !important;
+    border: 1px solid var(--kabridge-neutral-300) !important;
+  }
+  
+  .kabridge-gradient-primary, .kabridge-gradient-secondary, .kabridge-gradient-hero {
+    background: var(--kabridge-primary-600) !important;
+    color: white !important;
+  }
+}

@@ -1,459 +1,1553 @@
-// KABridge Platform Frontend JavaScript
+// KABridge Enhanced App JavaScript
+// Complete implementation with language switching and community features
 
-// Utility functions
-const API_BASE = '/api'
+console.log('KABridge app.js loaded successfully');
 
-async function fetchAPI(endpoint, options = {}) {
-  try {
-    const response = await fetch(API_BASE + endpoint, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-      },
-      ...options
-    })
+// Global state
+let currentLanguage = 'ko';
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('KABridge app initialized');
+    const path = window.location.pathname;
+    console.log('Current path:', path);
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    // Initialize language system
+    initializeLanguageSystem();
+    
+    // Initialize based on current page
+    if (path === '/') {
+        console.log('Initializing home page...');
+        initializeHomePage();
+    } else if (path === '/search') {
+        initializeSearchPage();
+    } else if (path === '/ai-matching') {
+        initializeAIMatchingPage();
+    } else if (path === '/community') {
+        initializeCommunityPage();
+    } else if (path === '/requests') {
+        initializeRequestsPage();
+    }
+});
+
+// Language System
+function initializeLanguageSystem() {
+    const languageBtn = document.getElementById('languageBtn');
+    const languageDropdown = document.getElementById('languageDropdown');
+    const languageOptions = document.querySelectorAll('.language-option');
+    
+    // Get saved language or default to Korean
+    currentLanguage = localStorage.getItem('kabridge-language') || 'ko';
+    updateLanguageDisplay(currentLanguage);
+    
+    if (languageBtn && languageDropdown) {
+        // Toggle dropdown
+        languageBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            languageDropdown.classList.toggle('active');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            languageDropdown.classList.remove('active');
+        });
+        
+        // Language option selection
+        languageOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const selectedLang = this.getAttribute('data-lang');
+                setLanguage(selectedLang);
+                languageDropdown.classList.remove('active');
+            });
+        });
+    }
+}
+
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('kabridge-language', lang);
+    updateLanguageDisplay(lang);
+    
+    // Update language button
+    const languageBtn = document.getElementById('languageBtn');
+    if (languageBtn) {
+        const flagAndText = lang === 'ko' ? '🇰🇷 한국어' : '🇸🇦 العربية';
+        languageBtn.querySelector('span').textContent = flagAndText;
     }
     
-    return await response.json()
-  } catch (error) {
-    console.error('API Error:', error)
-    throw error
-  }
+    // Update active language option
+    document.querySelectorAll('.language-option').forEach(option => {
+        option.classList.toggle('active', option.getAttribute('data-lang') === lang);
+    });
+    
+    // Reload content based on new language preference
+    const path = window.location.pathname;
+    if (path === '/') {
+        // Reload recent companies with language preference
+        loadRecentCompanies();
+    } else if (path === '/search') {
+        // Re-run current search with language preference
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && searchInput.value.trim()) {
+            performSearch();
+        }
+    } else if (path === '/community') {
+        // Reload community posts
+        const activeCategoryBtn = document.querySelector('.category-btn.active');
+        const category = activeCategoryBtn ? activeCategoryBtn.getAttribute('data-category') : '';
+        loadCommunityPosts(category);
+    }
 }
 
-// Company card component
-function createCompanyCard(company) {
-  const mainProducts = company.main_products ? JSON.parse(company.main_products) : []
-  const technologies = company.technologies ? JSON.parse(company.technologies) : []
-  const cooperationTypes = company.cooperation_types ? JSON.parse(company.cooperation_types) : []
-  
-  const cooperationTypeLabels = {
-    'export': '수출',
-    'import': '수입', 
-    'joint_venture': '합작투자',
-    'licensing': '라이센싱',
-    'partnership': '파트너십',
-    'investment': '투자'
-  }
-  
-  const industryLabels = {
-    'energy': '에너지',
-    'construction': '건설',
-    'ict': 'ICT',
-    'medical': '의료기기',
-    'automotive': '자동차',
-    'food': '식품',
-    'other': '기타'
-  }
-  
-  const countryLabels = {
-    'korea': '한국',
-    'saudi_arabia': '사우디아라비아',
-    'uae': 'UAE',
-    'qatar': '카타르',
-    'kuwait': '쿠웨이트',
-    'bahrain': '바레인',
-    'oman': '오만'
-  }
-  
-  return `
-    <div class="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow">
-      <div class="flex justify-between items-start mb-4">
-        <div>
-          <h3 class="text-xl font-semibold text-gray-900">${company.company_name}</h3>
-          ${company.company_name_en ? `<p class="text-gray-600">${company.company_name_en}</p>` : ''}
-          <div class="flex items-center mt-2 text-sm text-gray-500">
-            <i class="fas fa-map-marker-alt mr-1"></i>
-            <span>${countryLabels[company.country] || company.country}</span>
-            <span class="mx-2">•</span>
-            <span>${industryLabels[company.industry] || company.industry}</span>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button onclick="addToFavorites(${company.id})" class="text-gray-400 hover:text-red-500">
-            <i class="far fa-heart"></i>
-          </button>
-          <button onclick="sendCooperationRequest(${company.id})" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">
-            협력 요청
-          </button>
-        </div>
-      </div>
-      
-      <p class="text-gray-600 text-sm mb-4 line-clamp-3">${company.description || ''}</p>
-      
-      ${mainProducts.length > 0 ? `
-        <div class="mb-3">
-          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">주요 제품/서비스</span>
-          <div class="flex flex-wrap gap-1 mt-1">
-            ${mainProducts.slice(0, 3).map(product => 
-              `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${product}</span>`
-            ).join('')}
-            ${mainProducts.length > 3 ? `<span class="text-xs text-gray-500">+${mainProducts.length - 3} more</span>` : ''}
-          </div>
-        </div>
-      ` : ''}
-      
-      ${technologies.length > 0 ? `
-        <div class="mb-3">
-          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">핵심 기술</span>
-          <div class="flex flex-wrap gap-1 mt-1">
-            ${technologies.slice(0, 3).map(tech => 
-              `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded">${tech}</span>`
-            ).join('')}
-            ${technologies.length > 3 ? `<span class="text-xs text-gray-500">+${technologies.length - 3} more</span>` : ''}
-          </div>
-        </div>
-      ` : ''}
-      
-      ${cooperationTypes.length > 0 ? `
-        <div>
-          <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">협력 분야</span>
-          <div class="flex flex-wrap gap-1 mt-1">
-            ${cooperationTypes.map(type => 
-              `<span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">${cooperationTypeLabels[type] || type}</span>`
-            ).join('')}
-          </div>
-        </div>
-      ` : ''}
-    </div>
-  `
+function updateLanguageDisplay(lang) {
+    const html = document.documentElement;
+    
+    if (lang === 'ar') {
+        html.setAttribute('lang', 'ar');
+        html.setAttribute('dir', 'rtl');
+        html.classList.add('font-arabic');
+        
+        // Show Arabic text, hide Korean text
+        document.querySelectorAll('.lang-ko').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.lang-ar').forEach(el => el.classList.remove('hidden'));
+    } else {
+        html.setAttribute('lang', 'ko');
+        html.setAttribute('dir', 'ltr');
+        html.classList.remove('font-arabic');
+        
+        // Show Korean text, hide Arabic text
+        document.querySelectorAll('.lang-ko').forEach(el => el.classList.remove('hidden'));
+        document.querySelectorAll('.lang-ar').forEach(el => el.classList.add('hidden'));
+    }
+    
+    // Dispatch language change event
+    document.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lang } }));
 }
 
-// Load recent companies on home page
+// Home page initialization
+function initializeHomePage() {
+    loadRecentCompanies();
+    loadRecentPosts();
+    setupMainAIForm();
+}
+
+// Load recent posts for home page
+async function loadRecentPosts() {
+    try {
+        console.log('Loading recent posts...');
+        const response = await axios.get('/api/posts?limit=6');
+        const data = response.data;
+        console.log('Posts loaded:', data.posts?.length || 0);
+        renderRecentPosts(data.posts || []);
+        
+    } catch (error) {
+        console.error('Error loading recent posts:', error);
+        renderRecentPosts([]);
+    }
+}
+
+// Load recent companies for home page with language preference
 async function loadRecentCompanies() {
-  const container = document.getElementById('recent-companies')
-  if (!container) return
-  
-  try {
-    container.innerHTML = '<div class="col-span-3 text-center py-8"><i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i><p class="text-gray-500 mt-2">기업 정보를 불러오는 중...</p></div>'
-    
-    const data = await fetchAPI('/companies?limit=6')
-    
-    if (data.companies && data.companies.length > 0) {
-      container.innerHTML = data.companies.map(company => createCompanyCard(company)).join('')
-    } else {\n      container.innerHTML = '<div class=\"col-span-3 text-center py-8 text-gray-500\">등록된 기업이 없습니다.</div>'\n    }\n  } catch (error) {\n    console.error('Failed to load recent companies:', error)\n    container.innerHTML = '<div class=\"col-span-3 text-center py-8 text-red-500\">기업 정보를 불러오는데 실패했습니다.</div>'\n  }\n}\n\n// Search companies\nasync function searchCompanies() {\n  const resultsContainer = document.getElementById('search-results')\n  if (!resultsContainer) return\n  \n  const search = document.getElementById('search')?.value || ''\n  const country = document.getElementById('country')?.value || ''\n  const industry = document.getElementById('industry')?.value || ''\n  const business_type = document.getElementById('business_type')?.value || ''\n  \n  const params = new URLSearchParams()\n  if (search) params.append('search', search)\n  if (country) params.append('country', country)\n  if (industry) params.append('industry', industry)\n  if (business_type) params.append('business_type', business_type)\n  \n  try {\n    resultsContainer.innerHTML = '<div class=\"text-center py-8\"><i class=\"fas fa-spinner fa-spin text-gray-400 text-2xl\"></i><p class=\"text-gray-500 mt-2\">검색 중...</p></div>'\n    \n    const data = await fetchAPI(`/companies?${params.toString()}`)\n    \n    if (data.companies && data.companies.length > 0) {\n      resultsContainer.innerHTML = `\n        <div class=\"mb-4 text-gray-600\">\n          총 ${data.companies.length}개의 기업을 찾았습니다.\n        </div>\n        <div class=\"grid md:grid-cols-2 lg:grid-cols-3 gap-6\">\n          ${data.companies.map(company => createCompanyCard(company)).join('')}\n        </div>\n      `\n    } else {\n      resultsContainer.innerHTML = '<div class=\"text-center py-8 text-gray-500\">검색 조건에 맞는 기업이 없습니다.</div>'\n    }\n  } catch (error) {\n    console.error('Failed to search companies:', error)\n    resultsContainer.innerHTML = '<div class=\"text-center py-8 text-red-500\">검색에 실패했습니다.</div>'\n  }\n}\n\n// Send cooperation request\nfunction sendCooperationRequest(companyId) {\n  // For now, show an alert. In a real implementation, this would open a modal form\n  alert(`기업 ID ${companyId}에 협력 요청을 보내는 기능은 추후 구현 예정입니다.`)\n}\n\n// Add to favorites\nfunction addToFavorites(companyId) {\n  // For now, show an alert. In a real implementation, this would add to favorites\n  alert(`기업 ID ${companyId}를 즐겨찾기에 추가하는 기능은 추후 구현 예정입니다.`)\n}\n\n// Initialize page functionality\ndocument.addEventListener('DOMContentLoaded', function() {\n  // Load recent companies on home page\n  loadRecentCompanies()\n  \n  // Setup search functionality\n  const searchBtn = document.getElementById('search-btn')\n  if (searchBtn) {\n    searchBtn.addEventListener('click', searchCompanies)\n  }\n  \n  // Setup enter key for search\n  const searchInput = document.getElementById('search')\n  if (searchInput) {\n    searchInput.addEventListener('keypress', function(e) {\n      if (e.key === 'Enter') {\n        searchCompanies()\n      }\n    })\n  }\n  \n  // Load initial search results\n  if (document.getElementById('search-results')) {\n    searchCompanies()\n  }\n})"
-// Company registration form handler
-async function submitCompanyRegistration(event) {
-  event.preventDefault()
-  
-  const form = event.target
-  const formData = new FormData(form)
-  
-  // Convert FormData to JSON
-  const data = {}
-  for (let [key, value] of formData.entries()) {
-    if (key === 'cooperation_types') {
-      // Handle multiple checkbox values
-      if (!data[key]) data[key] = []
-      data[key].push(value)
-    } else {
-      data[key] = value
+    try {
+        console.log('Loading recent companies...');
+        // Language-based prioritization without strict filtering
+        const params = new URLSearchParams({
+            limit: '6',
+            lang: currentLanguage
+        });
+        
+        const response = await axios.get(`/api/companies?${params.toString()}`);
+        const data = response.data;
+        console.log('Companies loaded:', data.companies?.length || 0);
+        renderRecentCompanies(data.companies || []);
+        
+    } catch (error) {
+        console.error('Error loading recent companies:', error);
+        renderRecentCompanies([]);
     }
-  }
-  
-  // Convert cooperation_types array to JSON string
-  if (data.cooperation_types) {
-    data.cooperation_types = JSON.stringify(data.cooperation_types)
-  }
-  
-  const submitBtn = form.querySelector('button[type="submit"]')
-  const originalText = submitBtn.innerHTML
-  
-  try {
-    // Show loading state
-    submitBtn.disabled = true
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>등록 중...'
-    
-    const response = await fetchAPI('/companies', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    })
-    
-    // Show success message
-    alert('기업 등록이 완료되었습니다! 기업 탐색 페이지에서 확인하실 수 있습니다.')
-    
-    // Redirect to search page
-    window.location.href = '/search'
-    
-  } catch (error) {
-    console.error('Registration error:', error)
-    alert('기업 등록 중 오류가 발생했습니다. 다시 시도해주세요.')
-  } finally {
-    // Restore button state
-    submitBtn.disabled = false
-    submitBtn.innerHTML = originalText
-  }
 }
 
-// Update the DOMContentLoaded event listener to include registration form
-document.addEventListener('DOMContentLoaded', function() {
-  // Load recent companies on home page
-  loadRecentCompanies()
-  
-  // Setup search functionality
-  const searchBtn = document.getElementById('search-btn')
-  if (searchBtn) {
-    searchBtn.addEventListener('click', searchCompanies)
-  }
-  
-  // Setup enter key for search
-  const searchInput = document.getElementById('search')
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        searchCompanies()
-      }
-    })
-  }
-  
-  // Setup company registration form
-  const registrationForm = document.getElementById('company-registration-form')
-  if (registrationForm) {
-    registrationForm.addEventListener('submit', submitCompanyRegistration)
-  }
-  
-  // Load initial search results
-  if (document.getElementById('search-results')) {
-    searchCompanies()
-  }
-})
-
-// Cooperation Requests Management
-let currentTab = 'received'
-let selectedCompanyId = null
-
-function switchTab(tab) {
-  currentTab = tab
-  
-  // Update tab buttons
-  document.getElementById('received-tab').className = tab === 'received' ? 'tab-button active' : 'tab-button'
-  document.getElementById('sent-tab').className = tab === 'sent' ? 'tab-button active' : 'tab-button'
-  
-  // Load requests for current tab
-  if (selectedCompanyId) {
-    loadCooperationRequests()
-  }
-}
-
-async function loadCooperationRequests() {
-  if (!selectedCompanyId) return
-  
-  const content = document.getElementById('requests-content')
-  
-  try {
-    content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-gray-400 text-2xl"></i><p class="text-gray-500 mt-2">요청 내역을 불러오는 중...</p></div>'
+// Render recent companies with multilingual support
+function renderRecentCompanies(companies) {
+    const container = document.getElementById('recent-companies');
+    if (!container) return;
     
-    const data = await fetchAPI(`/cooperation-requests/${selectedCompanyId}?type=${currentTab}`)
-    
-    // Update counts
-    document.getElementById(`${currentTab}-count`).textContent = data.requests.length
-    
-    if (data.requests.length > 0) {
-      content.innerHTML = `
-        <div class="space-y-4">
-          ${data.requests.map(request => createRequestCard(request)).join('')}
-        </div>
-      `
-    } else {
-      content.innerHTML = `
-        <div class="text-center py-12 text-gray-500">
-          <i class="fas fa-inbox text-4xl mb-4"></i>
-          <p>${currentTab === 'received' ? '받은' : '보낸'} 협력 요청이 없습니다.</p>
-        </div>
-      `
+    if (companies.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-building text-4xl mb-4"></i>
+                <p class="lang-ko">등록된 기업이 없습니다.</p>
+                <p class="lang-ar hidden">لا توجد شركات مسجلة.</p>
+            </div>
+        `;
+        updateLanguageDisplay(currentLanguage);
+        return;
     }
-  } catch (error) {
-    console.error('Failed to load cooperation requests:', error)
-    content.innerHTML = '<div class="text-center py-8 text-red-500">요청 내역을 불러오는데 실패했습니다.</div>'
-  }
-}
-
-function createRequestCard(request) {
-  const statusColors = {
-    'pending': 'bg-yellow-100 text-yellow-800',
-    'accepted': 'bg-green-100 text-green-800', 
-    'rejected': 'bg-red-100 text-red-800',
-    'withdrawn': 'bg-gray-100 text-gray-800'
-  }
-  
-  const statusLabels = {
-    'pending': '대기 중',
-    'accepted': '승인됨',
-    'rejected': '거절됨',
-    'withdrawn': '철회됨'
-  }
-  
-  const cooperationTypeLabels = {
-    'export': '수출',
-    'import': '수입',
-    'joint_venture': '합작투자',
-    'licensing': '라이센싱',
-    'partnership': '파트너십',
-    'investment': '투자'
-  }
-  
-  const countryLabels = {
-    'korea': '한국',
-    'saudi_arabia': '사우디아라비아',
-    'uae': 'UAE',
-    'qatar': '카타르',
-    'kuwait': '쿠웨이트',
-    'bahrain': '바레인',
-    'oman': '오만'
-  }
-  
-  return `
-    <div class="bg-white rounded-lg border p-6">
-      <div class="flex justify-between items-start mb-4">
-        <div class="flex-1">
-          <div class="flex items-center mb-2">
-            <h3 class="text-lg font-semibold text-gray-900">${request.other_company_name}</h3>
-            <span class="ml-3 px-2 py-1 text-xs font-medium rounded ${statusColors[request.status]}">
-              ${statusLabels[request.status]}
-            </span>
-          </div>
-          <div class="flex items-center text-sm text-gray-500 mb-2">
-            <i class="fas fa-map-marker-alt mr-1"></i>
-            <span>${countryLabels[request.other_country] || request.other_country}</span>
-            <span class="mx-2">•</span>
-            <span>${cooperationTypeLabels[request.cooperation_type] || request.cooperation_type}</span>
-            <span class="mx-2">•</span>
-            <span>${new Date(request.created_at).toLocaleDateString('ko-KR')}</span>
-          </div>
-          <h4 class="font-medium text-gray-900 mb-2">${request.subject}</h4>
-          <p class="text-gray-600 text-sm line-clamp-2">${request.message}</p>
+    
+    container.innerHTML = companies.map(company => `
+        <div class="kabridge-profile-card">
+            <div class="profile-card-header">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="profile-status-indicator"></div>
+                </div>
+                <div class="profile-basic-info">
+                    <h3 class="profile-company-name text-safe">${getMultilingualText(company, 'name')}</h3>
+                    <div class="profile-meta">
+                        <span class="profile-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${getMultilingualText(company, 'location')}
+                        </span>
+                        <span class="profile-industry">
+                            ${getCountryFlag(company.country)} ${getIndustryName(company.industry)}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-body">
+                <div class="profile-section">
+                    <div class="profile-description text-safe line-clamp-2">
+                        ${getMultilingualText(company, 'description')}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4 class="profile-section-title">
+                        <span class="lang-ko">협력 분야</span>
+                        <span class="lang-ar hidden">مجال التعاون</span>
+                    </h4>
+                    <div class="profile-cooperation text-safe line-clamp-2">
+                        ${getMultilingualText(company, 'cooperation_needs')}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-footer">
+                <div class="profile-tags">
+                    <span class="profile-tag">${getIndustryName(company.industry)}</span>
+                    ${company.country === 'KR' ? '<span class="profile-tag profile-tag-korean">Korean</span>' : '<span class="profile-tag profile-tag-arab">Arab</span>'}
+                </div>
+                <div class="profile-action-buttons">
+                    <button class="profile-action-btn profile-action-btn-secondary" onclick="openDMModal('${company.id}', '${getMultilingualText(company, 'name').replace(/'/g, "\\'")}')">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span class="lang-ko">메시지</span>
+                        <span class="lang-ar hidden">رسالة</span>
+                    </button>
+                    <button class="profile-action-btn">
+                        <span class="lang-ko">연결하기</span>
+                        <span class="lang-ar hidden">الاتصال</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-      
-      <div class="flex justify-end space-x-2">
-        ${currentTab === 'received' && request.status === 'pending' ? `
-          <button 
-            onclick="updateRequestStatus(${request.id}, 'accepted')" 
-            class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700"
-          >
-            <i class="fas fa-check mr-1"></i>
-            승인
-          </button>
-          <button 
-            onclick="updateRequestStatus(${request.id}, 'rejected')" 
-            class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700"
-          >
-            <i class="fas fa-times mr-1"></i>
-            거절
-          </button>
-        ` : ''}
-        ${currentTab === 'sent' && request.status === 'pending' ? `
-          <button 
-            onclick="updateRequestStatus(${request.id}, 'withdrawn')" 
-            class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700"
-          >
-            <i class="fas fa-undo mr-1"></i>
-            철회
-          </button>
-        ` : ''}
-        <button 
-          onclick="viewRequestDetails(${request.id})" 
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-        >
-          <i class="fas fa-eye mr-1"></i>
-          상세보기
-        </button>
-      </div>
-    </div>
-  `
-}
-
-async function updateRequestStatus(requestId, status) {
-  try {
-    await fetchAPI(`/cooperation-requests/${requestId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ status })
-    })
+    `).join('');
     
-    // Reload requests
-    loadCooperationRequests()
+    updateLanguageDisplay(currentLanguage);
+}
+
+// Render recent posts for home page
+function renderRecentPosts(posts) {
+    const container = document.getElementById('recent-posts');
+    if (!container) return;
     
-    alert('요청 상태가 업데이트되었습니다.')
-  } catch (error) {
-    console.error('Failed to update request status:', error)
-    alert('상태 업데이트에 실패했습니다.')
-  }
+    if (posts.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-comments text-4xl mb-4"></i>
+                <p class="lang-ko">등록된 게시글이 없습니다.</p>
+                <p class="lang-ar hidden">لا توجد منشورات مسجلة.</p>
+            </div>
+        `;
+        updateLanguageDisplay(currentLanguage);
+        return;
+    }
+    
+    container.innerHTML = posts.map(post => `
+        <div class="kabridge-card p-6 hover:shadow-lg transition-all duration-300">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-kabridge-blue to-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-gray-900">${post.author || 'KABridge User'}</h3>
+                        <p class="text-xs text-gray-500">${formatDate(post.created_at)}</p>
+                    </div>
+                </div>
+                <span class="px-3 py-1 bg-kabridge-blue/10 text-kabridge-blue text-xs rounded-full">
+                    ${getCategoryName(post.category)}
+                </span>
+            </div>
+            
+            <h4 class="font-semibold text-gray-900 mb-2 line-clamp-2">
+                ${getMultilingualText(post, 'title')}
+            </h4>
+            
+            <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                ${getMultilingualText(post, 'content')}
+            </p>
+            
+            <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span><i class="fas fa-heart mr-1"></i>${post.likes || 0}</span>
+                    <span><i class="fas fa-comment mr-1"></i>${post.comments || 0}</span>
+                </div>
+                <a href="/community" class="text-kabridge-blue hover:text-blue-800 font-medium text-sm">
+                    <span class="lang-ko">자세히 보기</span>
+                    <span class="lang-ar hidden">عرض التفاصيل</span>
+                    <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
 }
 
-function viewRequestDetails(requestId) {
-  // For now, show an alert. In a real implementation, this would open a modal or navigate to details page
-  alert(`요청 ID ${requestId}의 상세 정보를 보는 기능은 추후 구현 예정입니다.`)
+// Search page initialization
+function initializeSearchPage() {
+    setupSearchFilters();
+    performSearch();
 }
 
-// Add CSS for tab buttons
-const style = document.createElement('style')
-style.textContent = `
-  .tab-button {
-    border-bottom: 2px solid transparent;
-    padding: 0.5rem 0;
-    font-medium: 500;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .tab-button:hover {
-    color: #3b82f6;
-    border-bottom-color: #dbeafe;
-  }
-  
-  .tab-button.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
-  }
-`
-document.head.appendChild(style)
+function setupSearchFilters() {
+    const searchInput = document.getElementById('searchInput');
+    const countryFilter = document.getElementById('countryFilter');
+    const industryFilter = document.getElementById('industryFilter');
+    const searchBtn = document.getElementById('searchBtn');
+    
+    let searchTimeout;
+    
+    function handleSearchInput() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 300);
+    }
+    
+    if (searchInput) searchInput.addEventListener('input', handleSearchInput);
+    if (countryFilter) countryFilter.addEventListener('change', performSearch);
+    if (industryFilter) industryFilter.addEventListener('change', performSearch);
+    if (searchBtn) searchBtn.addEventListener('click', performSearch);
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+}
 
-// Update DOMContentLoaded to include cooperation requests
-document.addEventListener('DOMContentLoaded', function() {
-  // Load recent companies on home page
-  loadRecentCompanies()
-  
-  // Setup search functionality
-  const searchBtn = document.getElementById('search-btn')
-  if (searchBtn) {
-    searchBtn.addEventListener('click', searchCompanies)
-  }
-  
-  // Setup enter key for search
-  const searchInput = document.getElementById('search')
-  if (searchInput) {
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        searchCompanies()
-      }
-    })
-  }
-  
-  // Setup company registration form
-  const registrationForm = document.getElementById('company-registration-form')
-  if (registrationForm) {
-    registrationForm.addEventListener('submit', submitCompanyRegistration)
-  }
-  
-  // Setup cooperation requests page
-  const companySelect = document.getElementById('demo-company-select')
-  if (companySelect) {
-    companySelect.addEventListener('change', function(e) {
-      selectedCompanyId = e.target.value
-      if (selectedCompanyId) {
-        loadCooperationRequests()
-      } else {
-        document.getElementById('requests-content').innerHTML = '<div class="text-center py-12 text-gray-500">위에서 기업을 선택하면 협력 요청 내역을 확인할 수 있습니다.</div>'
-      }
-    })
-  }
-  
-  // Load initial search results
-  if (document.getElementById('search-results')) {
-    searchCompanies()
-  }
-})
+async function performSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const countryFilter = document.getElementById('countryFilter');
+    const industryFilter = document.getElementById('industryFilter');
+    const searchResults = document.getElementById('searchResults');
+    const loadingState = document.getElementById('loadingState');
+    const noResultsState = document.getElementById('noResultsState');
+    const searchStats = document.getElementById('searchStats');
+    
+    if (loadingState) loadingState.classList.remove('hidden');
+    if (searchResults) searchResults.innerHTML = '';
+    if (noResultsState) noResultsState.classList.add('hidden');
+    
+    try {
+        const params = new URLSearchParams();
+        
+        const searchValue = searchInput ? searchInput.value.trim() : '';
+        const countryValue = countryFilter ? countryFilter.value : '';
+        const industryValue = industryFilter ? industryFilter.value : '';
+        
+        if (searchValue) params.set('search', searchValue);
+        if (countryValue) params.set('country', countryValue);
+        if (industryValue) params.set('industry', industryValue);
+        params.set('lang', currentLanguage);
+        params.set('limit', '20');
+        
+        const response = await axios.get(`/api/companies?${params.toString()}`);
+        const data = response.data;
+        
+        if (loadingState) loadingState.classList.add('hidden');
+        
+        if (searchStats) {
+            const statsText = currentLanguage === 'ko' 
+                ? `총 ${data.total || 0}개 기업 중 ${(data.companies || []).length}개 표시`
+                : `عرض ${(data.companies || []).length} من أصل ${data.total || 0} شركة`;
+            searchStats.textContent = statsText;
+        }
+        
+        if (data.companies && data.companies.length > 0) {
+            renderSearchResults(data.companies);
+        } else {
+            if (noResultsState) noResultsState.classList.remove('hidden');
+            updateLanguageDisplay(currentLanguage);
+        }
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        if (loadingState) loadingState.classList.add('hidden');
+        if (noResultsState) noResultsState.classList.remove('hidden');
+        updateLanguageDisplay(currentLanguage);
+    }
+}
+
+function renderSearchResults(companies) {
+    const container = document.getElementById('searchResults');
+    if (!container) return;
+    
+    container.innerHTML = companies.map(company => `
+        <div class="kabridge-profile-card kabridge-profile-card-detailed">
+            <div class="profile-card-header">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="profile-status-indicator"></div>
+                </div>
+                <div class="profile-basic-info">
+                    <h3 class="profile-company-name text-safe">${getMultilingualText(company, 'name')}</h3>
+                    <div class="profile-meta">
+                        <span class="profile-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${getMultilingualText(company, 'location')}
+                        </span>
+                        <span class="profile-industry">
+                            ${getCountryFlag(company.country)} ${getIndustryName(company.industry)}
+                        </span>
+                        <span class="profile-employees">
+                            <i class="fas fa-users"></i>
+                            ${company.employee_count || 'N/A'}명
+                        </span>
+                    </div>
+                </div>
+                <div class="profile-badge-wrapper">
+                    <span class="profile-badge profile-badge-${company.country === 'KR' ? 'korean' : 'arab'}">
+                        ${company.country === 'KR' ? 'Korean' : 'Arab'}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="profile-card-body">
+                <div class="profile-section">
+                    <div class="profile-description text-safe line-clamp-3">
+                        ${getMultilingualText(company, 'description')}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4 class="profile-section-title">
+                        <span class="lang-ko">협력 분야</span>
+                        <span class="lang-ar hidden">مجال التعاون</span>
+                    </h4>
+                    <div class="profile-cooperation text-safe line-clamp-2">
+                        ${getMultilingualText(company, 'cooperation_needs')}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-footer">
+                <div class="profile-tags">
+                    <span class="profile-tag">${getIndustryName(company.industry)}</span>
+                    <span class="profile-tag">
+                        <i class="fas fa-users mr-1"></i>
+                        ${company.employee_count || 'N/A'}명
+                    </span>
+                </div>
+                <div class="profile-action-buttons">
+                    <button class="profile-action-btn profile-action-btn-secondary" onclick="openDMModal('${company.id}', '${getMultilingualText(company, 'name').replace(/'/g, "\\'")}')">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span class="lang-ko">메시지</span>
+                        <span class="lang-ar hidden">رسالة</span>
+                    </button>
+                    <button class="profile-action-btn">
+                        <span class="lang-ko">자세히 보기</span>
+                        <span class="lang-ar hidden">عرض التفاصيل</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
+}
+
+// AI Matching page
+function initializeAIMatchingPage() {
+    setupAIMatchingForm();
+}
+
+function setupAIMatchingForm() {
+    const form = document.getElementById('aiMatchingForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const cooperationPurpose = document.getElementById('cooperationPurpose').value.trim();
+        const userCountry = document.getElementById('userCountry').value;
+        
+        if (!cooperationPurpose) {
+            const alertText = currentLanguage === 'ko' 
+                ? '협력 희망 분야를 입력해주세요.' 
+                : 'يرجى إدخال مجال التعاون المطلوب.';
+            alert(alertText);
+            return;
+        }
+        
+        await performAIMatching(cooperationPurpose, userCountry);
+    });
+}
+
+async function performAIMatching(cooperationPurpose, userCountry) {
+    const loadingState = document.getElementById('matchingLoading');
+    const resultsContainer = document.getElementById('matchingResults');
+    const resultsList = document.getElementById('matchingResultsList');
+    
+    if (loadingState) loadingState.classList.remove('hidden');
+    if (resultsContainer) resultsContainer.classList.add('hidden');
+    
+    try {
+        const response = await axios.post('/api/ai-matching', {
+            cooperation_purpose: cooperationPurpose,
+            user_country: userCountry
+        });
+        
+        const data = response.data;
+        
+        if (loadingState) loadingState.classList.add('hidden');
+        
+        if (data.matches && data.matches.length > 0) {
+            renderAIMatchingResults(data.matches);
+            if (resultsContainer) resultsContainer.classList.remove('hidden');
+        } else {
+            const alertText = currentLanguage === 'ko' 
+                ? '매칭되는 기업을 찾을 수 없습니다. 다른 조건으로 시도해보세요.'
+                : 'لم يتم العثور على شركات مطابقة. جرب شروط أخرى.';
+            alert(alertText);
+        }
+        
+    } catch (error) {
+        console.error('AI Matching error:', error);
+        if (loadingState) loadingState.classList.add('hidden');
+        const alertText = currentLanguage === 'ko' 
+            ? 'AI 매칭 중 오류가 발생했습니다. 다시 시도해주세요.'
+            : 'حدث خطأ أثناء مطابقة AI. يرجى المحاولة مرة أخرى.';
+        alert(alertText);
+    }
+}
+
+function renderAIMatchingResults(matches) {
+    const container = document.getElementById('matchingResultsList');
+    if (!container) return;
+    
+    container.innerHTML = matches.map((match, index) => `
+        <div class="kabridge-profile-card kabridge-profile-card-matching">
+            <div class="profile-card-header">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="profile-status-indicator"></div>
+                    <div class="profile-rank-badge">
+                        #${index + 1}
+                    </div>
+                </div>
+                <div class="profile-basic-info">
+                    <h3 class="profile-company-name text-safe">${getMultilingualText(match, 'name')}</h3>
+                    <div class="profile-meta">
+                        <span class="profile-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${getMultilingualText(match, 'location')}
+                        </span>
+                        <span class="profile-industry">
+                            ${getCountryFlag(match.country)} ${getIndustryName(match.industry)}
+                        </span>
+                    </div>
+                </div>
+                <div class="profile-matching-score">
+                    <div class="matching-score-circle">
+                        <span class="score-number">${match.matching_score || 85}</span>
+                        <span class="score-label">
+                            <span class="lang-ko">점</span>
+                            <span class="lang-ar hidden">نقطة</span>
+                        </span>
+                    </div>
+                    <div class="score-explanation text-safe">
+                        ${match.matching_explanation || '높은 매칭도'}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-body">
+                <div class="profile-section">
+                    <div class="profile-description text-safe line-clamp-3">
+                        ${getMultilingualText(match, 'description')}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4 class="profile-section-title">
+                        <span class="lang-ko">협력 분야</span>
+                        <span class="lang-ar hidden">مجال التعاون</span>
+                    </h4>
+                    <div class="profile-cooperation text-safe line-clamp-2">
+                        ${getMultilingualText(match, 'cooperation_needs')}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4 class="profile-section-title">
+                        <i class="fas fa-brain mr-1"></i>
+                        <span class="lang-ko">매칭 분석</span>
+                        <span class="lang-ar hidden">تحليل المطابقة</span>
+                    </h4>
+                    <div class="matching-explanation text-safe">
+                        ${match.matching_explanation || '산업 분야와 협력 목적이 잘 일치합니다.'}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-footer">
+                <div class="profile-tags">
+                    <span class="profile-tag">${getIndustryName(match.industry)}</span>
+                    <span class="profile-tag profile-tag-matching">
+                        <i class="fas fa-percentage mr-1"></i>
+                        ${Math.round((match.matching_score || 85))}% 매칭
+                    </span>
+                </div>
+                <div class="profile-action-buttons">
+                    <button class="profile-action-btn profile-action-btn-secondary" onclick="openDMModal('${match.id}', '${getMultilingualText(match, 'name').replace(/'/g, "\\'")}')">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span class="lang-ko">메시지</span>
+                        <span class="lang-ar hidden">رسالة</span>
+                    </button>
+                    <button class="profile-action-btn">
+                        <span class="lang-ko">연결 요청</span>
+                        <span class="lang-ar hidden">طلب الاتصال</span>
+                        <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
+}
+
+// Community Page
+function initializeCommunityPage() {
+    setupCategoryFilter();
+    setupNewPostModal();
+    loadCommunityPosts();
+}
+
+function setupCategoryFilter() {
+    const categoryBtns = document.querySelectorAll('.category-btn');
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active state
+            categoryBtns.forEach(b => {
+                b.classList.remove('kabridge-btn-primary');
+                b.classList.add('kabridge-btn-outline');
+                b.classList.remove('active');
+            });
+            
+            this.classList.remove('kabridge-btn-outline');
+            this.classList.add('kabridge-btn-primary');
+            this.classList.add('active');
+            
+            // Load posts for selected category
+            const category = this.getAttribute('data-category');
+            loadCommunityPosts(category);
+        });
+    });
+}
+
+async function loadCommunityPosts(category = '') {
+    const container = document.getElementById('communityPosts');
+    const loading = document.getElementById('postsLoading');
+    
+    if (loading) loading.classList.remove('hidden');
+    if (container) container.innerHTML = '';
+    
+    try {
+        const params = new URLSearchParams();
+        if (category) params.set('category', category);
+        params.set('limit', '20');
+        
+        const response = await axios.get(`/api/posts?${params.toString()}`);
+        const data = response.data;
+        
+        if (loading) loading.classList.add('hidden');
+        
+        if (data.posts && data.posts.length > 0) {
+            renderCommunityPosts(data.posts);
+        } else {
+            if (container) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fas fa-comments text-4xl mb-4"></i>
+                        <p class="lang-ko">게시글이 없습니다.</p>
+                        <p class="lang-ar hidden">لا توجد منشورات.</p>
+                    </div>
+                `;
+                updateLanguageDisplay(currentLanguage);
+            }
+        }
+        
+    } catch (error) {
+        console.error('Error loading community posts:', error);
+        if (loading) loading.classList.add('hidden');
+    }
+}
+
+function renderCommunityPosts(posts) {
+    const container = document.getElementById('communityPosts');
+    if (!container) return;
+    
+    container.innerHTML = posts.map(post => `
+        <div class="kabridge-card ${post.status === 'featured' ? 'kabridge-card-premium' : ''} p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 text-safe line-clamp-2">
+                        ${getMultilingualText(post, 'title')}
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 mb-3">
+                        <span class="flex items-center">
+                            <i class="fas fa-user mr-1"></i>
+                            ${post.author_name}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-building mr-1"></i>
+                            ${post.author_company || 'N/A'}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-flag mr-1"></i>
+                            ${getCountryFlag(post.author_country)} ${getCountryName(post.author_country)}
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-clock mr-1"></i>
+                            ${formatDate(post.created_at)}
+                        </span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end ml-4">
+                    ${post.status === 'featured' ? '<span class="badge badge-gold mb-2">추천</span>' : ''}
+                    <span class="badge badge-outline">${getCategoryName(post.category)}</span>
+                </div>
+            </div>
+            
+            <div class="text-gray-700 line-clamp-3 text-safe">
+                ${getMultilingualText(post, 'content')}
+            </div>
+            
+            <div class="flex items-center justify-between mt-4 pt-4 border-t">
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <span class="flex items-center">
+                        <i class="fas fa-eye mr-1"></i>
+                        ${post.views || 0}
+                    </span>
+                    <span class="flex items-center">
+                        <i class="fas fa-heart mr-1"></i>
+                        ${post.likes || 0}
+                    </span>
+                </div>
+                <button class="kabridge-btn kabridge-btn-outline text-sm">
+                    <span class="lang-ko">자세히 보기</span>
+                    <span class="lang-ar hidden">اقرأ المزيد</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
+}
+
+// Matching Requests Page
+function initializeRequestsPage() {
+    setupRequestForm();
+    loadMatchingRequests();
+}
+
+function setupRequestForm() {
+    const form = document.getElementById('requestForm');
+    if (!form) return;
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const requesterName = document.getElementById('requesterName').value.trim();
+        const requesterCompany = document.getElementById('requesterCompany').value.trim();
+        const requesterCountry = document.getElementById('requesterCountry').value;
+        const cooperationPurpose = document.getElementById('cooperationPurpose').value.trim();
+        const contactEmail = document.getElementById('contactEmail').value.trim();
+        
+        if (!requesterName || !requesterCountry || !cooperationPurpose) {
+            const alertText = currentLanguage === 'ko' 
+                ? '필수 항목을 모두 입력해주세요.'
+                : 'يرجى ملء جميع الحقول المطلوبة.';
+            alert(alertText);
+            return;
+        }
+        
+        try {
+            const response = await axios.post('/api/matching-requests', {
+                requester_name: requesterName,
+                requester_company: requesterCompany,
+                requester_country: requesterCountry,
+                business_type: 'Partnership',
+                cooperation_purpose: cooperationPurpose,
+                contact_email: contactEmail,
+                priority: 'normal'
+            });
+            
+            if (response.data.success) {
+                const successText = currentLanguage === 'ko' 
+                    ? '매칭 요청이 성공적으로 등록되었습니다!'
+                    : 'تم تسجيل طلب المطابقة بنجاح!';
+                alert(successText);
+                
+                // Clear form
+                form.reset();
+                
+                // Reload requests
+                loadMatchingRequests();
+            }
+            
+        } catch (error) {
+            console.error('Error creating matching request:', error);
+            const errorText = currentLanguage === 'ko' 
+                ? '요청 등록 중 오류가 발생했습니다.'
+                : 'حدث خطأ أثناء تسجيل الطلب.';
+            alert(errorText);
+        }
+    });
+}
+
+async function loadMatchingRequests() {
+    const container = document.getElementById('matchingRequestsList');
+    if (!container) return;
+    
+    try {
+        const response = await axios.get('/api/matching-requests?limit=10');
+        const data = response.data;
+        
+        if (data.requests && data.requests.length > 0) {
+            renderMatchingRequests(data.requests);
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-handshake text-3xl mb-3"></i>
+                    <p class="lang-ko">아직 매칭 요청이 없습니다.</p>
+                    <p class="lang-ar hidden">لا توجد طلبات مطابقة بعد.</p>
+                </div>
+            `;
+            updateLanguageDisplay(currentLanguage);
+        }
+        
+    } catch (error) {
+        console.error('Error loading matching requests:', error);
+    }
+}
+
+function renderMatchingRequests(requests) {
+    const container = document.getElementById('matchingRequestsList');
+    if (!container) return;
+    
+    container.innerHTML = requests.map(request => `
+        <div class="kabridge-card p-4 ${request.priority === 'high' ? 'border-l-4 border-kabridge-gold' : ''}">
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-900 mb-1 text-safe truncate-safe">
+                        ${request.requester_name}
+                    </h4>
+                    <p class="text-sm text-gray-600 text-safe truncate-safe">
+                        ${request.requester_company || 'N/A'} • ${getCountryFlag(request.requester_country)} ${getCountryName(request.requester_country)}
+                    </p>
+                </div>
+                <div class="flex flex-col items-end ml-2">
+                    ${request.priority === 'high' ? '<span class="badge badge-gold text-xs">긴급</span>' : ''}
+                    <span class="text-xs text-gray-500">${formatDate(request.created_at)}</span>
+                </div>
+            </div>
+            
+            <p class="text-sm text-gray-700 line-clamp-2 text-safe">
+                ${getMultilingualText(request, 'cooperation_purpose')}
+            </p>
+            
+            <div class="flex justify-between items-center mt-3 pt-3 border-t">
+                <span class="text-xs text-gray-500">
+                    ${request.budget_range || 'N/A'} • ${request.timeline || 'N/A'}
+                </span>
+                <button class="kabridge-btn kabridge-btn-outline text-xs">
+                    <span class="lang-ko">연락하기</span>
+                    <span class="lang-ar hidden">اتصل</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
+}
+
+// Utility Functions
+function getMultilingualText(obj, field) {
+    if (currentLanguage === 'ar' && obj[field + '_ar']) {
+        return escapeHtml(obj[field + '_ar']);
+    } else if (currentLanguage === 'ko' && obj[field]) {
+        return escapeHtml(obj[field]);
+    } else if (obj[field + '_en']) {
+        return escapeHtml(obj[field + '_en']);
+    } else if (obj[field]) {
+        return escapeHtml(obj[field]);
+    }
+    return '';
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getCountryFlag(countryCode) {
+    const flags = {
+        'KR': '🇰🇷',
+        'SA': '🇸🇦', 
+        'AE': '🇦🇪',
+        'EG': '🇪🇬',
+        'JO': '🇯🇴',
+        'LB': '🇱🇧',
+        'QA': '🇶🇦',
+        'BH': '🇧🇭',
+        'KW': '🇰🇼',
+        'OM': '🇴🇲'
+    };
+    return flags[countryCode] || '🏢';
+}
+
+function getCountryName(countryCode) {
+    const names = {
+        ko: {
+            'KR': '한국', 'SA': '사우디아라비아', 'AE': 'UAE', 'EG': '이집트',
+            'JO': '요단', 'LB': '레바논', 'QA': '카타르', 'BH': '바레인',
+            'KW': '쿠웨이트', 'OM': '오만'
+        },
+        ar: {
+            'KR': 'كوريا', 'SA': 'السعودية', 'AE': 'الإمارات', 'EG': 'مصر',
+            'JO': 'الأردن', 'LB': 'لبنان', 'QA': 'قطر', 'BH': 'البحرين',
+            'KW': 'الكويت', 'OM': 'عمان'
+        }
+    };
+    
+    return names[currentLanguage]?.[countryCode] || countryCode;
+}
+
+function getIndustryName(industry) {
+    const industries = {
+        ko: {
+            'technology': '기술/IT',
+            'manufacturing': '제조업',
+            'energy': '에너지',
+            'healthcare': '헬스케어', 
+            'finance': '금융',
+            'construction': '건설',
+            'food': '식품',
+            'logistics': '물류',
+            'retail': '소매',
+            'education': '교육'
+        },
+        ar: {
+            'technology': 'التكنولوجيا/تقنية المعلومات',
+            'manufacturing': 'التصنيع',
+            'energy': 'الطاقة',
+            'healthcare': 'الرعاية الصحية',
+            'finance': 'التمويل',
+            'construction': 'البناء',
+            'food': 'الأغذية',
+            'logistics': 'الخدمات اللوجستية',
+            'retail': 'التجارة',
+            'education': 'التعليم'
+        }
+    };
+    
+    return industries[currentLanguage]?.[industry] || industry;
+}
+
+function getCategoryName(category) {
+    const categories = {
+        ko: {
+            'general': '일반',
+            'partnership': '파트너십',
+            'investment': '투자',
+            'technology': '기술',
+            'trade': '무역'
+        },
+        ar: {
+            'general': 'عام',
+            'partnership': 'شراكة',
+            'investment': 'استثمار',
+            'technology': 'تكنولوجيا',
+            'trade': 'تجارة'
+        }
+    };
+    
+    return categories[currentLanguage]?.[category] || category;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (currentLanguage === 'ar') {
+        if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+        if (diffHours < 24) return `منذ ${diffHours} ساعة`;
+        if (diffDays < 7) return `منذ ${diffDays} يوم`;
+        return date.toLocaleDateString('ar');
+    } else {
+        if (diffMins < 60) return `${diffMins}분 전`;
+        if (diffHours < 24) return `${diffHours}시간 전`;
+        if (diffDays < 7) return `${diffDays}일 전`;
+        return date.toLocaleDateString('ko');
+    }
+}
+
+// New Post Modal Functions
+function setupNewPostModal() {
+    const newPostBtn = document.getElementById('newPostBtn');
+    const newPostModal = document.getElementById('newPostModal');
+    const closePostModal = document.getElementById('closePostModal');
+    const cancelPost = document.getElementById('cancelPost');
+    const newPostForm = document.getElementById('newPostForm');
+    
+    // Open modal
+    if (newPostBtn) {
+        newPostBtn.addEventListener('click', function() {
+            if (newPostModal) {
+                newPostModal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+    
+    // Close modal functions
+    function closeModal() {
+        if (newPostModal) {
+            newPostModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            if (newPostForm) newPostForm.reset();
+        }
+    }
+    
+    if (closePostModal) {
+        closePostModal.addEventListener('click', closeModal);
+    }
+    
+    if (cancelPost) {
+        cancelPost.addEventListener('click', closeModal);
+    }
+    
+    // Close modal when clicking backdrop
+    if (newPostModal) {
+        newPostModal.addEventListener('click', function(e) {
+            if (e.target === newPostModal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Handle form submission
+    if (newPostForm) {
+        newPostForm.addEventListener('submit', handleNewPostSubmission);
+    }
+}
+
+async function handleNewPostSubmission(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const postData = {
+        title: formData.get('title'),
+        title_en: formData.get('title_en'),
+        title_ar: formData.get('title_ar'),
+        content: formData.get('content'),
+        content_en: formData.get('content_en'),
+        content_ar: formData.get('content_ar'),
+        author_name: formData.get('author_name'),
+        author_company: formData.get('author_company'),
+        author_country: formData.get('author_country'),
+        category: formData.get('category')
+    };
+    
+    // Validation
+    if (!postData.title || !postData.content || !postData.author_name || !postData.author_country) {
+        alert('필수 필드를 모두 입력해주세요.');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>게시 중...';
+        submitBtn.disabled = true;
+        
+        const response = await axios.post('/api/posts', postData);
+        
+        if (response.data.success) {
+            // Success message
+            alert('게시글이 성공적으로 작성되었습니다!');
+            
+            // Close modal
+            document.getElementById('newPostModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            e.target.reset();
+            
+            // Reload posts
+            loadCommunityPosts();
+        } else {
+            throw new Error(response.data.error || 'Failed to create post');
+        }
+        
+    } catch (error) {
+        console.error('Error creating post:', error);
+        alert('게시글 작성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+        // Reset button state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>게시글 작성';
+        submitBtn.disabled = false;
+    }
+}
+
+// Main AI Form Setup
+function setupMainAIForm() {
+    const mainAIForm = document.getElementById('mainAIForm');
+    const mainAIInput = document.getElementById('mainAIInput');
+    const suggestionButtons = document.querySelectorAll('.ai-suggestion');
+    
+    // Set up placeholder text
+    function updateAIPlaceholder() {
+        if (mainAIInput) {
+            const placeholder = currentLanguage === 'ko' 
+                ? '어떤 비즈니스 협력을 원하시나요? 자세히 설명해주세요...'
+                : 'ما نوع التعاون التجاري الذي تريده؟ يرجى الوصف بالتفصيل...';
+            mainAIInput.placeholder = placeholder;
+        }
+    }
+    
+    updateAIPlaceholder();
+    
+    // Handle suggestion button clicks
+    suggestionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const koreanText = this.querySelector('.lang-ko').textContent;
+            const arabicText = this.querySelector('.lang-ar').textContent;
+            const text = currentLanguage === 'ko' ? koreanText : arabicText;
+            
+            if (mainAIInput) {
+                mainAIInput.value = text;
+                mainAIInput.focus();
+            }
+        });
+    });
+    
+    // Handle form submission
+    if (mainAIForm) {
+        mainAIForm.addEventListener('submit', handleMainAISubmission);
+    }
+    
+    // Update placeholder when language changes
+    document.addEventListener('languageChanged', updateAIPlaceholder);
+}
+
+async function handleMainAISubmission(e) {
+    e.preventDefault();
+    
+    const mainAIInput = document.getElementById('mainAIInput');
+    const aiResultsSection = document.getElementById('aiResultsSection');
+    const aiResultsList = document.getElementById('aiResultsList');
+    
+    const inputValue = mainAIInput ? mainAIInput.value.trim() : '';
+    
+    if (!inputValue) {
+        const alertText = currentLanguage === 'ko' 
+            ? '질문을 입력해주세요.' 
+            : 'يرجى إدخال سؤال.';
+        alert(alertText);
+        return;
+    }
+    
+    try {
+        // Show loading state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
+        submitBtn.disabled = true;
+        
+        // Show results section with loading
+        if (aiResultsSection) {
+            aiResultsSection.classList.remove('hidden');
+            aiResultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        if (aiResultsList) {
+            aiResultsList.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="loading-spinner"></div>
+                    <p class="text-gray-600 mt-4">
+                        <span class="lang-ko">AI가 최적의 파트너를 찾고 있습니다...</span>
+                        <span class="lang-ar hidden">الذكاء الاصطناعي يبحث عن أفضل شريك...</span>
+                    </p>
+                </div>
+            `;
+            updateLanguageDisplay(currentLanguage);
+        }
+        
+        // Make AI matching request
+        const userCountry = currentLanguage === 'ko' ? 'KR' : 'SA';
+        const response = await axios.post('/api/ai-matching', {
+            cooperation_purpose: inputValue,
+            user_country: userCountry
+        });
+        
+        const data = response.data;
+        
+        if (data.matches && data.matches.length > 0) {
+            renderMainAIResults(data.matches);
+        } else {
+            if (aiResultsList) {
+                aiResultsList.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500">
+                        <i class="fas fa-search text-4xl mb-4"></i>
+                        <p class="lang-ko">매칭되는 기업을 찾을 수 없습니다. 다른 키워드로 시도해보세요.</p>
+                        <p class="lang-ar hidden">لم يتم العثور على شركات مطابقة. جرب كلمات مفتاحية أخرى.</p>
+                    </div>
+                `;
+                updateLanguageDisplay(currentLanguage);
+            }
+        }
+        
+    } catch (error) {
+        console.error('AI Matching error:', error);
+        if (aiResultsList) {
+            aiResultsList.innerHTML = `
+                <div class="col-span-full text-center py-12 text-red-500">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                    <p class="lang-ko">오류가 발생했습니다. 다시 시도해주세요.</p>
+                    <p class="lang-ar hidden">حدث خطأ. يرجى المحاولة مرة أخرى.</p>
+                </div>
+            `;
+            updateLanguageDisplay(currentLanguage);
+        }
+    } finally {
+        // Reset button state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane text-sm"></i>';
+        submitBtn.disabled = false;
+    }
+}
+
+function renderMainAIResults(matches) {
+    const aiResultsList = document.getElementById('aiResultsList');
+    if (!aiResultsList) return;
+    
+    aiResultsList.innerHTML = matches.map((match, index) => `
+        <div class="kabridge-profile-card kabridge-profile-card-matching">
+            <div class="profile-card-header">
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="profile-status-indicator"></div>
+                    <div class="profile-rank-badge">
+                        #${index + 1}
+                    </div>
+                </div>
+                <div class="profile-basic-info">
+                    <h3 class="profile-company-name text-safe">${getMultilingualText(match, 'name')}</h3>
+                    <div class="profile-meta">
+                        <span class="profile-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${getMultilingualText(match, 'location')}
+                        </span>
+                        <span class="profile-industry">
+                            ${getCountryFlag(match.country)} ${getIndustryName(match.industry)}
+                        </span>
+                    </div>
+                </div>
+                <div class="profile-matching-score">
+                    <div class="matching-score-circle">
+                        <span class="score-number">${match.matching_score || 85}</span>
+                        <span class="score-label">
+                            <span class="lang-ko">점</span>
+                            <span class="lang-ar hidden">نقطة</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-body">
+                <div class="profile-section">
+                    <div class="profile-description text-safe line-clamp-3">
+                        ${getMultilingualText(match, 'description')}
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h4 class="profile-section-title">
+                        <span class="lang-ko">협력 분야</span>
+                        <span class="lang-ar hidden">مجال التعاون</span>
+                    </h4>
+                    <div class="profile-cooperation text-safe line-clamp-2">
+                        ${getMultilingualText(match, 'cooperation_needs')}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-card-footer">
+                <div class="profile-tags">
+                    <span class="profile-tag">${getIndustryName(match.industry)}</span>
+                    <span class="profile-tag profile-tag-matching">
+                        <i class="fas fa-percentage mr-1"></i>
+                        ${Math.round((match.matching_score || 85))}% 매칭
+                    </span>
+                </div>
+                <div class="profile-action-buttons">
+                    <button class="profile-action-btn profile-action-btn-secondary" onclick="openDMModal('${match.id}', '${getMultilingualText(match, 'name').replace(/'/g, "\\'")}')">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <span class="lang-ko">메시지</span>
+                        <span class="lang-ar hidden">رسالة</span>
+                    </button>
+                    <button class="profile-action-btn">
+                        <span class="lang-ko">연결 요청</span>
+                        <span class="lang-ar hidden">طلب الاتصال</span>
+                        <i class="fas fa-paper-plane ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    updateLanguageDisplay(currentLanguage);
+}
+// DM Modal Functions
+function openDMModal(companyId, companyName) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('dmModal');
+    if (!modal) {
+        createDMModal();
+        modal = document.getElementById('dmModal');
+    }
+    
+    // Set company info
+    const modalCompanyName = document.getElementById('dmModalCompanyName');
+    const dmCompanyIdInput = document.getElementById('dmCompanyId');
+    
+    if (modalCompanyName) {
+        modalCompanyName.textContent = companyName;
+    }
+    if (dmCompanyIdInput) {
+        dmCompanyIdInput.value = companyId;
+    }
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus on message textarea
+    const messageTextarea = document.getElementById('dmMessage');
+    if (messageTextarea) {
+        setTimeout(() => messageTextarea.focus(), 100);
+    }
+}
+
+function createDMModal() {
+    const modalHTML = `
+        <div id="dmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                <div class="border-b border-gray-200 px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            <i class="fas fa-envelope text-kabridge-blue mr-2"></i>
+                            <span class="lang-ko">메시지 보내기</span>
+                            <span class="lang-ar hidden">إرسال رسالة</span>
+                        </h3>
+                        <button onclick="closeDMModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">
+                        <span class="lang-ko">수신자:</span>
+                        <span class="lang-ar hidden">المستقبل:</span>
+                        <span id="dmModalCompanyName" class="font-medium text-gray-900"></span>
+                    </p>
+                </div>
+                
+                <form id="dmForm" class="p-6">
+                    <input type="hidden" id="dmCompanyId" name="company_id">
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="lang-ko">제목</span>
+                                <span class="lang-ar hidden">الموضوع</span>
+                            </label>
+                            <input type="text" id="dmSubject" name="subject" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-kabridge-blue"
+                                   placeholder="">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <span class="lang-ko">메시지</span>
+                                <span class="lang-ar hidden">الرسالة</span>
+                            </label>
+                            <textarea id="dmMessage" name="message" required rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-kabridge-blue"
+                                      placeholder=""></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="lang-ko">보낸 사람</span>
+                                    <span class="lang-ar hidden">المرسل</span>
+                                </label>
+                                <input type="text" id="dmSenderName" name="sender_name" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-kabridge-blue"
+                                       placeholder="">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <span class="lang-ko">이메일</span>
+                                    <span class="lang-ar hidden">البريد الإلكتروني</span>
+                                </label>
+                                <input type="email" id="dmSenderEmail" name="sender_email" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-kabridge-blue"
+                                       placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3 mt-6">
+                        <button type="button" onclick="closeDMModal()" class="kabridge-btn kabridge-btn-outline">
+                            <span class="lang-ko">취소</span>
+                            <span class="lang-ar hidden">إلغاء</span>
+                        </button>
+                        <button type="submit" class="kabridge-btn kabridge-btn-primary">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            <span class="lang-ko">메시지 전송</span>
+                            <span class="lang-ar hidden">إرسال الرسالة</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    const dmForm = document.getElementById('dmForm');
+    if (dmForm) {
+        dmForm.addEventListener('submit', handleDMSubmission);
+    }
+    
+    // Update placeholders based on current language
+    updateDMPlaceholders();
+}
+
+function closeDMModal() {
+    const modal = document.getElementById('dmModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        
+        // Reset form
+        const form = document.getElementById('dmForm');
+        if (form) form.reset();
+    }
+}
+
+function updateDMPlaceholders() {
+    const subjectInput = document.getElementById('dmSubject');
+    const messageTextarea = document.getElementById('dmMessage');
+    const senderNameInput = document.getElementById('dmSenderName');
+    const senderEmailInput = document.getElementById('dmSenderEmail');
+    
+    if (currentLanguage === 'ko') {
+        if (subjectInput) subjectInput.placeholder = '협력 제안 또는 문의사항';
+        if (messageTextarea) messageTextarea.placeholder = '안녕하세요. 귀하의 회사와 비즈니스 협력에 대해 논의하고 싶습니다...';
+        if (senderNameInput) senderNameInput.placeholder = '홍길동';
+        if (senderEmailInput) senderEmailInput.placeholder = 'hong@company.co.kr';
+    } else {
+        if (subjectInput) subjectInput.placeholder = 'اقتراح تعاون أو استفسار';
+        if (messageTextarea) messageTextarea.placeholder = 'مرحبا. أود مناقشة التعاون التجاري مع شركتكم...';
+        if (senderNameInput) senderNameInput.placeholder = 'أحمد محمد';
+        if (senderEmailInput) senderEmailInput.placeholder = 'ahmed@company.com';
+    }
+}
+
+async function handleDMSubmission(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const dmData = {
+        company_id: formData.get('company_id'),
+        subject: formData.get('subject'),
+        message: formData.get('message'),
+        sender_name: formData.get('sender_name'),
+        sender_email: formData.get('sender_email')
+    };
+    
+    try {
+        // Show loading state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span class="lang-ko">전송 중...</span><span class="lang-ar hidden">جاري الإرسال...</span>';
+        submitBtn.disabled = true;
+        
+        // Simulate API call (for now just show success)
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Success message
+        const successText = currentLanguage === 'ko' 
+            ? '메시지가 성공적으로 전송되었습니다!'
+            : 'تم إرسال الرسالة بنجاح!';
+        alert(successText);
+        
+        // Close modal
+        closeDMModal();
+        
+    } catch (error) {
+        console.error('Error sending DM:', error);
+        const errorText = currentLanguage === 'ko' 
+            ? '메시지 전송 중 오류가 발생했습니다. 다시 시도해주세요.'
+            : 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.';
+        alert(errorText);
+    } finally {
+        // Reset button state
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i><span class="lang-ko">메시지 전송</span><span class="lang-ar hidden">إرسال الرسالة</span>';
+        submitBtn.disabled = false;
+    }
+}
+
+// Update DM placeholders when language changes
+document.addEventListener('languageChanged', function() {
+    updateDMPlaceholders();
+});

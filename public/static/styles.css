@@ -1,3 +1,1054 @@
-/* KABridge Platform Custom Styles */
+/* KABridge Premium Design System */
 
-/* Line clamp utility for multi-line text truncation */\n.line-clamp-3 {\n  display: -webkit-box;\n  -webkit-line-clamp: 3;\n  -webkit-box-orient: vertical;\n  overflow: hidden;\n}\n\n.line-clamp-2 {\n  display: -webkit-box;\n  -webkit-line-clamp: 2;\n  -webkit-box-orient: vertical;\n  overflow: hidden;\n}\n\n/* Custom animations */\n@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(10px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n.fade-in {\n  animation: fadeIn 0.3s ease-out;\n}\n\n/* Custom button styles */\n.btn-primary {\n  @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;\n}\n\n.btn-secondary {\n  @apply bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors;\n}\n\n.btn-outline {\n  @apply border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors;\n}\n\n/* Custom form styles */\n.form-input {\n  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors;\n}\n\n.form-select {\n  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors;\n}\n\n.form-textarea {\n  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical;\n}\n\n/* Card styles */\n.card {\n  @apply bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow;\n}\n\n.card-header {\n  @apply border-b border-gray-200 pb-4 mb-4;\n}\n\n.card-body {\n  @apply space-y-4;\n}\n\n/* Badge styles */\n.badge {\n  @apply inline-block px-2 py-1 text-xs font-medium rounded;\n}\n\n.badge-blue {\n  @apply bg-blue-100 text-blue-800;\n}\n\n.badge-green {\n  @apply bg-green-100 text-green-800;\n}\n\n.badge-purple {\n  @apply bg-purple-100 text-purple-800;\n}\n\n.badge-gray {\n  @apply bg-gray-100 text-gray-800;\n}\n\n.badge-red {\n  @apply bg-red-100 text-red-800;\n}\n\n.badge-yellow {\n  @apply bg-yellow-100 text-yellow-800;\n}\n\n/* Status indicators */\n.status-active {\n  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;\n}\n\n.status-pending {\n  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800;\n}\n\n.status-inactive {\n  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800;\n}\n\n/* Loading spinner */\n.spinner {\n  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;\n}\n\n/* Custom scrollbar for webkit browsers */\n::-webkit-scrollbar {\n  width: 6px;\n}\n\n::-webkit-scrollbar-track {\n  background: #f1f1f1;\n  border-radius: 3px;\n}\n\n::-webkit-scrollbar-thumb {\n  background: #c1c1c1;\n  border-radius: 3px;\n}\n\n::-webkit-scrollbar-thumb:hover {\n  background: #a1a1a1;\n}\n\n/* RTL support for Arabic */\n[dir=\"rtl\"] {\n  text-align: right;\n}\n\n[dir=\"rtl\"] .flex {\n  flex-direction: row-reverse;\n}\n\n/* Responsive design improvements */\n@media (max-width: 768px) {\n  .mobile-hidden {\n    display: none;\n  }\n  \n  .mobile-full {\n    width: 100%;\n  }\n}\n\n/* Print styles */\n@media print {\n  .no-print {\n    display: none !important;\n  }\n  \n  .print-only {\n    display: block !important;\n  }\n}\n\n/* Accessibility improvements */\n.focus-visible:focus {\n  outline: 2px solid #3b82f6;\n  outline-offset: 2px;\n}\n\n/* High contrast mode support */\n@media (prefers-contrast: high) {\n  .card {\n    border: 2px solid #000;\n  }\n  \n  .btn-primary {\n    border: 2px solid #000;\n  }\n}\n\n/* Reduced motion support */\n@media (prefers-reduced-motion: reduce) {\n  * {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n  }\n}\n\n/* Custom utility classes */\n.text-gradient {\n  background: linear-gradient(45deg, #3b82f6, #8b5cf6);\n  -webkit-background-clip: text;\n  -webkit-text-fill-color: transparent;\n  background-clip: text;\n}\n\n.glass-effect {\n  backdrop-filter: blur(10px);\n  -webkit-backdrop-filter: blur(10px);\n  background-color: rgba(255, 255, 255, 0.1);\n}\n\n/* Country flag emojis - fallback for missing flag support */\n.flag-kr::before { content: \"🇰🇷\"; }\n.flag-sa::before { content: \"🇸🇦\"; }\n.flag-ae::before { content: \"🇦🇪\"; }\n.flag-qa::before { content: \"🇶🇦\"; }\n.flag-kw::before { content: \"🇰🇼\"; }\n.flag-bh::before { content: \"🇧🇭\"; }\n.flag-om::before { content: \"🇴🇲\"; }"
+/* CSS 변수 정의 */
+:root {
+  --kabridge-primary: #1e40af;
+  --kabridge-primary-light: #3b82f6;
+  --kabridge-primary-dark: #1e3a8a;
+  --kabridge-gold: #f59e0b;
+  --kabridge-gold-light: #fbbf24;
+  --kabridge-gold-dark: #d97706;
+  --kabridge-success: #10b981;
+  --kabridge-error: #ef4444;
+  --kabridge-warning: #f59e0b;
+  --kabridge-info: #06b6d4;
+  
+  /* 그라디언트 */
+  --gradient-primary: linear-gradient(135deg, var(--kabridge-primary) 0%, var(--kabridge-primary-light) 100%);
+  --gradient-gold: linear-gradient(135deg, var(--kabridge-gold) 0%, var(--kabridge-gold-light) 100%);
+  --gradient-hero: linear-gradient(135deg, var(--kabridge-primary-dark) 0%, var(--kabridge-primary) 50%, var(--kabridge-primary-light) 100%);
+  
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* 트랜지션 */
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-normal: all 0.3s ease-in-out;
+  --transition-slow: all 0.5s ease-in-out;
+}
+
+/* 글로벌 스타일 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Noto Sans KR', 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+}
+
+/* 언어별 폰트 설정 */
+[lang="ko"] {
+  font-family: 'Noto Sans KR', 'Inter', sans-serif;
+}
+
+[lang="ar"] {
+  font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+/* 텍스트 안전성 */
+.text-safe {
+  word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.truncate-safe {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
+/* 컨테이너 안전성 */
+.container-safe {
+  max-width: 100%;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* 카드 컴포넌트 */
+.kabridge-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  transition: var(--transition-normal);
+  overflow: hidden;
+  position: relative;
+}
+
+.kabridge-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: var(--transition-normal);
+}
+
+.kabridge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--kabridge-primary-light);
+}
+
+.kabridge-card:hover::before {
+  opacity: 1;
+}
+
+/* 프리미엄 카드 */
+.kabridge-card-premium {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid var(--kabridge-gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.kabridge-card-premium::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-gold);
+  z-index: -1;
+  border-radius: 18px;
+}
+
+/* 버튼 스타일 */
+.kabridge-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.kabridge-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: var(--transition-fast);
+}
+
+.kabridge-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.kabridge-btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.kabridge-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.kabridge-btn-secondary {
+  background: var(--gradient-gold);
+  color: white;
+}
+
+.kabridge-btn-outline {
+  background: transparent;
+  color: var(--kabridge-primary);
+  border: 2px solid var(--kabridge-primary);
+}
+
+.kabridge-btn-outline:hover {
+  background: var(--kabridge-primary);
+  color: white;
+}
+
+/* 언어 선택기 */
+.language-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 150px;
+  overflow: hidden;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition-normal);
+}
+
+.language-dropdown.active {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.language-option:hover {
+  background: #f3f4f6;
+}
+
+.language-option.active {
+  background: var(--kabridge-primary);
+  color: white;
+}
+
+/* 네비게이션 스타일 */
+.kabridge-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* 로고 스타일 */
+.kabridge-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: var(--transition-normal);
+}
+
+.kabridge-logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 히어로 섹션 */
+.kabridge-hero {
+  background: var(--gradient-hero);
+  position: relative;
+  overflow: hidden;
+}
+
+.kabridge-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.05"><circle cx="30" cy="30" r="2"/></g></svg>') repeat;
+  animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* 통계 카드 */
+.stats-card {
+  text-align: center;
+  padding: 32px 24px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--kabridge-primary) 0%, transparent 70%);
+  opacity: 0.03;
+  transition: var(--transition-slow);
+}
+
+.stats-card:hover::before {
+  opacity: 0.08;
+  transform: scale(1.1);
+}
+
+.stats-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.stats-number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stats-label {
+  font-size: 1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* 기업 카드 */
+.company-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.company-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: var(--transition-normal);
+}
+
+.company-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--kabridge-primary);
+}
+
+.company-card:hover::before {
+  transform: scaleX(1);
+}
+
+.company-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-md);
+}
+
+.company-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.company-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.company-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.company-description {
+  color: #4b5563;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.cooperation-needs {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid var(--kabridge-primary);
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.cooperation-needs-title {
+  font-weight: 600;
+  color: var(--kabridge-primary-dark);
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.cooperation-needs-content {
+  color: var(--kabridge-primary);
+  font-weight: 500;
+}
+
+/* 배지 스타일 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-primary {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.badge-gold {
+  background: var(--gradient-gold);
+  color: white;
+}
+
+.badge-outline {
+  background: transparent;
+  border: 1px solid var(--kabridge-primary);
+  color: var(--kabridge-primary);
+}
+
+/* 국가 플래그 */
+.country-flag {
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* 로딩 애니메이션 */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid var(--kabridge-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 폼 스타일 */
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  transition: var(--transition-fast);
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--kabridge-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+/* AI 매칭 결과 */
+.matching-result {
+  border-left: 4px solid var(--kabridge-gold);
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.matching-score {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: var(--gradient-gold);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.matching-explanation {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--kabridge-primary-dark);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .kabridge-card {
+    margin: 8px;
+    border-radius: 12px;
+  }
+  
+  .stats-number {
+    font-size: 2rem;
+  }
+  
+  .logo-text {
+    font-size: 20px;
+  }
+  
+  .company-card {
+    padding: 16px;
+  }
+  
+  .company-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .kabridge-btn {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .stats-card {
+    padding: 24px 16px;
+  }
+}
+
+/* 접근성 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 다크모드 지원 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --kabridge-primary: #3b82f6;
+    --kabridge-primary-light: #60a5fa;
+    --kabridge-primary-dark: #1d4ed8;
+  }
+}
+
+/* Modern Profile Cards */
+.kabridge-profile-card {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.kabridge-profile-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(30, 64, 175, 0.15);
+  border-color: var(--kabridge-primary);
+}
+
+.profile-card-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.profile-avatar-wrapper {
+  position: relative;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--kabridge-primary), var(--kabridge-gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.2);
+}
+
+.profile-status-indicator {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 20px;
+  height: 20px;
+  background: #10b981;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.profile-basic-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-company-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.profile-meta span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-meta i {
+  width: 14px;
+  color: var(--kabridge-primary);
+}
+
+.profile-badge-wrapper {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.profile-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-badge-korean {
+  background: linear-gradient(135deg, #fef3c7, #fbbf24);
+  color: #92400e;
+}
+
+.profile-badge-arab {
+  background: linear-gradient(135deg, #dbeafe, #3b82f6);
+  color: #1e40af;
+}
+
+.profile-card-body {
+  padding: 0 24px 16px;
+}
+
+.profile-section {
+  margin-bottom: 16px;
+}
+
+.profile-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-description {
+  color: #4b5563;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.profile-cooperation {
+  color: #6b7280;
+  line-height: 1.4;
+  font-size: 0.875rem;
+}
+
+.profile-card-footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f3f4f6;
+}
+
+.profile-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-tag {
+  padding: 6px 12px;
+  background: #f3f4f6;
+  color: #374151;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.profile-tag-korean {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+}
+
+.profile-tag-arab {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+}
+
+.profile-action-btn {
+  padding: 8px 20px;
+  background: var(--kabridge-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.profile-action-btn:hover {
+  background: var(--kabridge-primary-dark);
+  transform: translateX(4px);
+}
+
+/* Detailed Profile Card (for search results) */
+.kabridge-profile-card-detailed {
+  padding: 0;
+}
+
+.kabridge-profile-card-detailed .profile-card-header {
+  padding: 32px 32px 20px;
+}
+
+.kabridge-profile-card-detailed .profile-avatar {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+}
+
+.kabridge-profile-card-detailed .profile-company-name {
+  font-size: 1.5rem;
+}
+
+.kabridge-profile-card-detailed .profile-card-body {
+  padding: 0 32px 20px;
+}
+
+.kabridge-profile-card-detailed .profile-card-footer {
+  padding: 20px 32px 32px;
+}
+
+/* AI Matching Profile Card */
+.kabridge-profile-card-matching {
+  background: linear-gradient(135deg, #fefbff 0%, #f8fafc 100%);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.kabridge-profile-card-matching::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--kabridge-primary), var(--kabridge-gold));
+  border-radius: 20px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+}
+
+.kabridge-profile-card-matching .profile-card-header {
+  position: relative;
+}
+
+.profile-rank-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: linear-gradient(135deg, var(--kabridge-gold), #f59e0b);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  z-index: 10;
+}
+
+.profile-matching-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 100px;
+}
+
+.matching-score-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--kabridge-primary), var(--kabridge-gold));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 16px rgba(30, 64, 175, 0.2);
+}
+
+.score-number {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.score-explanation {
+  font-size: 0.75rem;
+  color: #6b7280;
+  max-width: 100px;
+  line-height: 1.3;
+}
+
+.matching-explanation {
+  background: linear-gradient(135deg, #dbeafe, #f0f9ff);
+  border-radius: 12px;
+  padding: 12px;
+  color: #1e40af;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.profile-tag-matching {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #166534;
+  font-weight: 600;
+}
+
+/* Profile Action Buttons */
+.profile-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.profile-action-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.profile-action-btn-secondary:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+  transform: translateX(0);
+}
+
+/* Responsive Action Buttons */
+@media (max-width: 768px) {
+  .profile-action-buttons {
+    width: 100%;
+  }
+  
+  .profile-action-btn {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+  
+  .profile-action-btn-secondary {
+    flex: 0.8;
+  }
+}
+
+/* Responsive Design for Profile Cards */
+@media (max-width: 768px) {
+  .kabridge-profile-card {
+    margin: 8px;
+    border-radius: 16px;
+  }
+  
+  .profile-card-header {
+    padding: 20px 20px 12px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+  
+  .profile-meta {
+    align-items: center;
+  }
+  
+  .profile-card-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .profile-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .kabridge-nav,
+  .kabridge-btn,
+  .language-selector {
+    display: none !important;
+  }
+  
+  .kabridge-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}
