@@ -1,0 +1,22 @@
+# Cloudflare Pages Configuration for KABridge
+name = "kabridge"
+main = "src/index.tsx"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# Production environment configuration
+[env.production]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "kabridge-production" 
+database_id = "placeholder-database-id"  # Will be updated after creation
+
+# Development environment configuration  
+[env.development]
+
+[[env.development.d1_databases]]
+binding = "DB"
+database_name = "kabridge-production"
+database_id = "placeholder-database-id"  # Will be updated after creation
