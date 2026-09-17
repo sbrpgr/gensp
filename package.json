@@ -27,7 +27,7 @@
     "logs": "pm2 logs kabridge --nostream --lines 50"
   },
   "dependencies": {
-    "hono": "^4.9.8"
+    "hono": "^4.13.8"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250919.0",
