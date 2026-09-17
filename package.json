@@ -21,10 +21,11 @@
     "git:commit": "git add . && git commit -m",
     "git:status": "git status",
     "git:log": "git log --oneline",
-    "setup:prod": "npm run db:migrate:prod && curl -X POST https://kabridge.pages.dev/api/init-data",
+    "setup:prod": "npm run db:migrate:prod",
     "deploy:github": "git add . && git commit -m 'Deploy update' && git push origin main",
     "health:check": "./health-monitor.sh",
-    "logs": "pm2 logs kabridge --nostream --lines 50"
+    "logs": "pm2 logs kabridge --nostream --lines 50",
+    "test:security": "npm run build && node --test tests/admin-routes.test.mjs"
   },
   "dependencies": {
     "hono": "^4.9.8"

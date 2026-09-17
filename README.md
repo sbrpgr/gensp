@@ -6,7 +6,7 @@
 
 ### 주요 기능
 - 🤖 **AI 기반 기업 매칭**: 고도화된 알고리즘으로 최적의 비즈니스 파트너 추천
-- 🏢 **600+ 기업 데이터베이스**: 한국 300개 + 아랍 300개 기업 정보
+- 🏢 **600개 합성 샘플 기업 데이터베이스**: 한국 300개 + 아랍 300개 기업 정보
 - 💬 **커뮤니티 시스템**: 비즈니스 경험 및 기회 공유
 - 🌍 **다국어 지원**: 한국어 ↔ 아랍어 실시간 언어 전환
 - 📱 **반응형 디자인**: 모든 디바이스에서 최적화된 사용자 경험
@@ -86,7 +86,7 @@ npx wrangler d1 create kabridge-production
 npx wrangler d1 migrations apply kabridge-production --local
 
 # 샘플 데이터 초기화 (로컬)
-curl -X POST http://localhost:3000/api/init-data
+npm run db:seed # 로컬 D1에만 샘플 적재
 ```
 
 ### 4. 개발 서버 실행
@@ -144,7 +144,7 @@ npx wrangler d1 create kabridge-production
 npx wrangler d1 migrations apply kabridge-production
 
 # 프로덕션 데이터 초기화
-curl -X POST https://kabridge.pages.dev/api/init-data
+# 운영 샘플 적재는 권한을 가진 운영자가 Wrangler CLI로 별도 수행
 ```
 
 ## 📁 프로젝트 구조
@@ -189,13 +189,13 @@ kabridge/
 - `POST /api/ai-match` - AI 기반 기업 매칭
 
 ### 유틸리티
-- `POST /api/init-data` - 샘플 데이터 초기화
+- `POST /api/init-data`, `POST /api/bulk-insert` - HTTP 접근 차단(403); 초기화는 운영자 CLI로만 수행
 
 ## 🎯 현재 구현 상태
 
 ### ✅ 완료된 기능
 - [x] AI 중심 홈페이지 인터페이스
-- [x] 600개 기업 데이터베이스 (한국 300개 + 아랍 300개)  
+- [x] 600개 합성 샘플 기업 데이터베이스 (한국 300개 + 아랍 300개)
 - [x] 프로파일 카드 형태 기업 정보 표시
 - [x] 다국어 지원 (한국어 ↔ 아랍어)
 - [x] 커뮤니티 시스템 (게시글 작성/조회)
@@ -233,3 +233,6 @@ kabridge/
 ---
 
 **KABridge** - 한국과 아랍 세계를 연결하는 비즈니스 플랫폼 🌉
+## 보안 검증
+
+`npm run test:security`는 배포 번들을 빌드한 뒤, 관리용 초기화 API의 비인가 POST 요청이 DB에 접근하기 전에 거부되는지 검증합니다. `setup:prod`는 스키마 마이그레이션만 실행하며 공개 HTTP 초기화 호출은 제거했습니다.
