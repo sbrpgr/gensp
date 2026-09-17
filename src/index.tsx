@@ -8,6 +8,12 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
+// Bootstrap data must be loaded through the authenticated deployment CLI.
+// Block legacy write endpoints before any route handler can reach the database.
+for (const path of ['/api/init-data', '/api/bulk-insert']) {
+  app.use(path, (c) => c.json({ error: 'Administrative data initialization is disabled over HTTP.' }, 403))
+}
+
 // Enable CORS for API routes
 app.use('/api/*', cors())
 
